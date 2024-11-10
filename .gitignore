@@ -1,0 +1,20 @@
+# dev
+dev-doc/
+
+# env
+.env
+.venv/
+
+# python
+*.pyc
+__pycache__/
+*.py[cod]
+
+# android
+*.apk
+
+# sqlite
+*.db
+
+# log
+logs/
