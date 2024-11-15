@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 
 from app import schemas, security
 from app.database import models
+from app.schemas.users import User
+from app.security import get_password_hash
 
 
 def get_user_by_uid(db: Session, uid: int):
@@ -19,6 +21,22 @@ def create_user(db: Session, user: schemas.users.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def update_user_password(db: Session, user: User, new_password: str) -> User:
+    user.hashed_password = get_password_hash(new_password)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def update_user_username(db: Session, user: User, new_username: str) -> User:
+    user.username = new_username
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 def get_file_by_fid(db: Session, fid: int):

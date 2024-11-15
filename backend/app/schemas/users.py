@@ -22,3 +22,12 @@ class User(UserBase):
 
 class UserInDB(User):
     hashed_password: str
+
+
+class UserPasswordUpdate(BaseModel):
+    old_password: str
+    new_password: str
+
+
+class UserUsernameUpdate(BaseModel):
+    username: str

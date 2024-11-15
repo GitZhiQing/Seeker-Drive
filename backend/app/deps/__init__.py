@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app import schemas, security, settings
 from app.database import SessionLocal, crud
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 
 def get_db():
@@ -28,10 +28,12 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Se
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[security.ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        uid: str = payload.get("sub")
+        username: str = payload.get("username")
+        exp: int = payload.get("exp")
+        if uid is None or username is None:
             raise credentials_exception
-        token_data = schemas.auth.TokenData(**payload)
+        token_data = schemas.auth.TokenData(uid=uid, username=username, exp=exp)
     except InvalidTokenError:
         raise credentials_exception
     user = crud.get_user_by_uid(db, token_data.uid)

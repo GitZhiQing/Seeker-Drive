@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
+from fastapi import HTTPException
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
@@ -38,6 +39,18 @@ def authenticate_user(db: Session, username: str, password: str) -> schemas.user
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
+
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        uid: str = payload.get("sub")
+        username: str = payload.get("username")
+        if uid is None or username is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return {"uid": uid, "username": username}
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
