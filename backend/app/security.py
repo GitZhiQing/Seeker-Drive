@@ -1,0 +1,54 @@
+# security.py
+from datetime import datetime, timedelta, timezone
+
+import jwt
+from passlib.context import CryptContext
+from sqlalchemy.orm import Session
+
+from app import schemas, settings
+from app.database import crud
+
+ALGORITHM = "HS256"  # 签名算法
+
+# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    验证密码
+    """
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password: str) -> str:
+    """
+    生成密码哈希
+    """
+    return pwd_context.hash(password)
+
+
+def authenticate_user(db: Session, username: str, password: str) -> schemas.users.UserInDB | bool:
+    """
+    通过用户名和密码验证用户
+    """
+    user = crud.get_user_by_username(db, username)
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    """
+    生成访问令牌
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
