@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+import os
 
 
 class SDBaseSettings(BaseSettings):
@@ -6,6 +7,8 @@ class SDBaseSettings(BaseSettings):
     API_STR: str = "/api"
     SECRET_KEY: str = "seekerdrive"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 一周
+    STATIC_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                                   "static")  # 静态文件目录，默认为项目根目录下的static文件夹
 
     class Config:
         env_file = ".env"

@@ -39,6 +39,13 @@ def update_user_username(db: Session, user: User, new_username: str) -> User:
     return user
 
 
+def update_user_avatar(db: Session, user: User, file_path: str):
+    user.avatar = file_path
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 def get_file_by_fid(db: Session, fid: int):
     return db.query(models.File).filter(models.File.fid == fid).first()  # type: ignore
 
