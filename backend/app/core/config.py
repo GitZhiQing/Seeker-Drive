@@ -8,9 +8,13 @@ class SDBaseSettings(BaseSettings):
     SECRET_KEY: str = "seekerdrive"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 一周
     # 静态文件目录，默认为项目根目录下的static文件夹
-    STATIC_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "static")
+    STATIC_DIR: str = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "static"
+    )
     # 文件存储目录，默认为项目根目录下的drive文件夹
-    DRIVE_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "drive")
+    DRIVE_DIR: str = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "drive"
+    )
 
     class Config:
         env_file = ".env"

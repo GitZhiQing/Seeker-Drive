@@ -1,9 +1,9 @@
 import hashlib
-import os
 import shutil
+from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -13,12 +13,25 @@ from app.database import crud
 router = APIRouter()
 
 
+def get_drive_path(user_id: int) -> Path:
+    return Path(settings.DRIVE_DIR) / str(user_id)
+
+
+def get_file_path(user_id: int, filename: str) -> Path:
+    return get_drive_path(user_id) / filename
+
+
+def ensure_directory_exists(path: Path):
+    if not path.exists():
+        path.mkdir(parents=True, exist_ok=True)
+
+
 @router.get("/")
 def get_files_list(
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        db: Session = Depends(deps.get_db),
-        skip: int = 0,
-        limit: int = 100,
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
 ):
     """
     获取文件列表
@@ -29,26 +42,23 @@ def get_files_list(
 
 @router.post("/")
 async def post_file(
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        file: UploadFile = File(...),
-        db: Session = Depends(deps.get_db),
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    file: UploadFile = File(...),
+    db: Session = Depends(deps.get_db),
 ):
     """
     上传文件
     """
-    drive_path = f"{settings.DRIVE_DIR}/{current_user.uid}"
+    drive_path = get_drive_path(current_user.uid)
+    ensure_directory_exists(drive_path)
 
-    if not os.path.exists(drive_path):
-        os.makedirs(drive_path, exist_ok=True)
-
-    file_path = f"{drive_path}/{file.filename}"
-
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    file_path = get_file_path(current_user.uid, file.filename)
+    ensure_directory_exists(file_path.parent)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    file_size = os.path.getsize(file_path)
+    file_size = file_path.stat().st_size
 
     with open(file_path, "rb") as buffer:
         file_hash = hashlib.md5(buffer.read()).hexdigest()
@@ -69,59 +79,45 @@ async def post_file(
 
 @router.get("/{fid}")
 def get_file(
-        fid: int,
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        db: Session = Depends(deps.get_db),
+    fid: int,
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    db: Session = Depends(deps.get_db),
 ):
     """
     下载文件
     """
     db_file = crud.get_file_by_fid(db, fid=fid)
+    file_path = get_file_path(current_user.uid, db_file.name)
 
-    drive_path = f"{settings.DRIVE_DIR}/{current_user.uid}"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="文件不存在")
 
-    if not os.path.exists(drive_path):
-        os.makedirs(drive_path, exist_ok=True)
-
-    file_path = f"{drive_path}/{db_file.name}"
-
-    if not os.path.exists(file_path):
-        return {"error": "文件不存在"}
-
-    # 鉴权
     if db_file.user_id != current_user.uid:
-        return {"error": "无权下载"}
+        raise HTTPException(status_code=403, detail="无权下载")
+
     return FileResponse(path=file_path, filename=db_file.name)
 
 
 @router.delete("/{fid}")
 def delete_file(
-        fid: int,
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        db: Session = Depends(deps.get_db),
+    fid: int,
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    db: Session = Depends(deps.get_db),
 ):
     """
     删除文件
     """
     db_file = crud.get_file_by_fid(db, fid=fid)
+    file_path = get_file_path(current_user.uid, db_file.name)
 
-    drive_path = f"{settings.DRIVE_DIR}/{current_user.uid}"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="文件不存在")
 
-    if not os.path.exists(drive_path):
-        os.makedirs(drive_path, exist_ok=True)
-
-    file_path = f"{drive_path}/{db_file.name}"
-
-    if not os.path.exists(file_path):
-        return {"error": "文件不存在"}
-
-    # 鉴权
     if db_file.user_id != current_user.uid:
-        return {"error": "无权删除"}
+        raise HTTPException(status_code=403, detail="无权删除")
 
-    os.remove(file_path)
+    file_path.unlink()
 
-    # 删除数据库记录
     crud.delete_file_by_fid(db, fid=fid)
 
     return {"message": "删除成功"}

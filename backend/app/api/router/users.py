@@ -13,7 +13,9 @@ router = APIRouter()
 
 
 @router.get("/current")
-async def read_users_me(current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)]):
+async def read_users_me(
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)]
+):
     """
     获取当前用户信息
     """
@@ -21,7 +23,9 @@ async def read_users_me(current_user: Annotated[schemas.users.User, Depends(deps
 
 
 @router.post("/", response_model=schemas.users.User)
-async def create_user(user_in: schemas.users.UserCreate, db: Session = Depends(deps.get_db)):
+async def create_user(
+    user_in: schemas.users.UserCreate, db: Session = Depends(deps.get_db)
+):
     """
     创建用户
     """
@@ -37,14 +41,16 @@ async def create_user(user_in: schemas.users.UserCreate, db: Session = Depends(d
 
 @router.put("/current/password")
 async def update_password(
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        password_data: schemas.users.UserPasswordUpdate,
-        db: Session = Depends(deps.get_db)
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    password_data: schemas.users.UserPasswordUpdate,
+    db: Session = Depends(deps.get_db),
 ):
     """
     更新密码
     """
-    user = security.authenticate_user(db, username=current_user.username, password=password_data.old_password)
+    user = security.authenticate_user(
+        db, username=current_user.username, password=password_data.old_password
+    )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -56,9 +62,9 @@ async def update_password(
 
 @router.put("/current/username")
 async def update_username(
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        username_data: schemas.users.UserUsernameUpdate,
-        db: Session = Depends(deps.get_db)
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    username_data: schemas.users.UserUsernameUpdate,
+    db: Session = Depends(deps.get_db),
 ):
     """
     更新用户名
@@ -69,15 +75,17 @@ async def update_username(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered",
         )
-    updated_user = crud.update_user_username(db=db, user=current_user, new_username=username_data.username)
+    updated_user = crud.update_user_username(
+        db=db, user=current_user, new_username=username_data.username
+    )
     return {"uid": updated_user.uid, "username": updated_user.username}
 
 
 @router.put("/current/avatar")
 async def update_avatar(
-        current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
-        file: UploadFile = File(...),
-        db: Session = Depends(deps.get_db)
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    file: UploadFile = File(...),
+    db: Session = Depends(deps.get_db),
 ):
     """
     更新用户头像
@@ -93,6 +101,10 @@ async def update_avatar(
 
     # 更新用户头像路径
     file_path = f"avatars/{current_user.uid}_{file.filename}"
-    updated_user = crud.update_user_avatar(db=db, user=current_user, file_path=file_path)
-    return {"uid": updated_user.uid,
-            "avatar": app.url_path_for("static", path=file_path)}
+    updated_user = crud.update_user_avatar(
+        db=db, user=current_user, file_path=file_path
+    )
+    return {
+        "uid": updated_user.uid,
+        "avatar": app.url_path_for("static", path=file_path),
+    }

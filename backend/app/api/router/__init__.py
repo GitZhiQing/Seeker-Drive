@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.router import auth, files, users  # noqa
+from app.api.router import auth, files, users
 
 router = APIRouter()
 router.include_router(auth.router, prefix="/auth", tags=["auth"])
