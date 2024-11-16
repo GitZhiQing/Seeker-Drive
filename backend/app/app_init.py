@@ -54,7 +54,7 @@ def db_init_prod():
             user_in = schemas.users.UserCreate(username="seeker", password="123456")
             existing_user = (
                 db.query(models.User)
-                .filter(models.User.username == user_in.username)
+                .filter(models.User.username == user_in.username)  # type: ignore
                 .first()
             )  # type: ignore
             if not existing_user:
