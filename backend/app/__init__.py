@@ -31,6 +31,8 @@ from app import app_init  # noqa
 
 app_init.db_init()
 logging.info("Database initialized.")
+app_init.dir_init()
+logging.info("Directories initialized.")
 
 # CORS
 app.add_middleware(

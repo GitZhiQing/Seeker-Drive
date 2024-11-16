@@ -46,15 +46,11 @@ def update_user_avatar(db: Session, user: User, file_path: str):
     return user
 
 
-def get_file_by_fid(db: Session, fid: int):
-    return db.query(models.File).filter(models.File.fid == fid).first()  # type: ignore
+def get_files_by_uid(db: Session, skip: int = 0, limit: int = 100, user_id: int = None):
+    return db.query(models.File).filter(models.File.user_id == user_id).offset(skip).limit(limit).all()  # type: ignore
 
 
-def get_files_by_user_id(db: Session, user_id: int):
-    return db.query(models.File).filter(models.File.user_id == user_id).all()  # type: ignore
-
-
-def create_file(db: Session, file: schemas.files.FileCreate):
+def post_file_by_uid(db: Session, file: schemas.files.FileCreate):
     db_file = models.File(**file.dict())
     db.add(db_file)
     db.commit()
@@ -62,17 +58,12 @@ def create_file(db: Session, file: schemas.files.FileCreate):
     return db_file
 
 
-def get_folder_by_foid(db: Session, foid: int):
-    return db.query(models.Folder).filter(models.Folder.foid == foid).first()  # type: ignore
+def get_file_by_fid(db: Session, fid: int):
+    return db.query(models.File).filter(models.File.fid == fid).first()  # type: ignore
 
 
-def get_folders_by_user_id(db: Session, user_id: int):
-    return db.query(models.Folder).filter(models.Folder.user_id == user_id).all()  # type: ignore
-
-
-def create_folder(db: Session, folder: schemas.folders.FolderCreate):
-    db_folder = models.Folder(**folder.dict())
-    db.add(db_folder)
-    db.commit()
-    db.refresh(db_folder)
-    return db_folder
+def delete_file_by_fid(db: Session, fid: int):
+    db_file = db.query(models.File).filter(models.File.fid == fid).first()  # type: ignore
+    if db_file:
+        db.delete(db_file)
+        db.commit()

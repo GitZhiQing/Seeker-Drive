@@ -1,3 +1,4 @@
+import os
 from typing import Annotated
 import shutil
 
@@ -81,8 +82,12 @@ async def update_avatar(
     """
     更新用户头像
     """
+    avatar_path = f"{settings.STATIC_DIR}/{current_user.avatar}"
+    if not os.path.exists(avatar_path):
+        os.makedirs(avatar_path, exist_ok=True)
+
     # 保存上传的文件
-    file_location = f"{settings.STATIC_DIR}/avatars/{current_user.uid}_{file.filename}"
+    file_location = f"{avatar_path}/{current_user.uid}_{file.filename}"
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
