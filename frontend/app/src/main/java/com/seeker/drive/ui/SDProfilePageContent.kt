@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.seeker.drive.R
+import com.seeker.drive.createFileFromUri
 import com.seeker.drive.data.RetrofitInstance
 import com.seeker.drive.data.User
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -23,11 +24,6 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
 fun SDProfilePageContent(
@@ -135,39 +131,4 @@ fun handleImageUpload(
                 }
             })
     }
-}
-
-fun fetchCurrentUser(token: String, callback: (User?, String?) -> Unit) {
-    RetrofitInstance.api.getCurrentUser("Bearer $token")
-        .enqueue(object : Callback<User> {
-            override fun onResponse(call: Call<User>, response: Response<User>) {
-                if (response.isSuccessful) {
-                    callback(response.body(), null)
-                } else {
-                    callback(null, "加载用户信息失败")
-                }
-            }
-
-            override fun onFailure(call: Call<User>, t: Throwable) {
-                callback(null, "网络错误: ${t.message}")
-            }
-        })
-}
-
-fun createFileFromUri(context: Context, uri: Uri): File {
-    val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-    val fileName = uri.lastPathSegment ?: "temp_image"
-    val file = File(context.cacheDir, fileName)
-    val outputStream = FileOutputStream(file)
-    inputStream?.copyTo(outputStream)
-    inputStream?.close()
-    outputStream.close()
-    return file
-}
-
-fun convertToShanghaiTime(utcTimestamp: Long): String {
-    val date = Date(utcTimestamp * 1000)
-    val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-    format.timeZone = TimeZone.getTimeZone("Asia/Shanghai")
-    return format.format(date)
 }

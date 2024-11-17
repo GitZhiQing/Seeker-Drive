@@ -11,6 +11,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Query
 
 interface ApiService {
     @FormUrlEncoded
@@ -33,4 +34,18 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Part file: MultipartBody.Part
     ): Call<User>
+
+    @GET("files/")
+    fun getFilesList(
+        @Header("Authorization") token: String,
+        @Query("skip") skip: Int = 0,
+        @Query("limit") limit: Int = 100
+    ): Call<List<FileItem>>
+
+    @Multipart
+    @POST("files/")
+    fun uploadFile(
+        @Header("Authorization") token: String,
+        @Part file: MultipartBody.Part
+    ): Call<FileItem>
 }

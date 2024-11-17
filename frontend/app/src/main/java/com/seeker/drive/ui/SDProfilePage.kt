@@ -7,6 +7,8 @@ import androidx.compose.runtime.*
 import com.seeker.drive.MainViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
+import com.seeker.drive.convertToShanghaiTime
+import com.seeker.drive.fetchCurrentUser
 
 
 @Composable
@@ -59,3 +61,4 @@ fun SDProfilePage(viewModel: MainViewModel) {
         onLogout = { viewModel.logout() }
     )
 }
+

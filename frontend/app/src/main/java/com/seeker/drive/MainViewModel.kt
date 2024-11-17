@@ -19,7 +19,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val currentScreen: StateFlow<Screen> = _currentScreen
 
     var selectedItem by mutableIntStateOf(0)
-    var presses by mutableIntStateOf(0)
     var token by mutableStateOf<String?>(null)
         private set
 
@@ -51,4 +50,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         sharedPreferences.edit().remove("token").apply()
         navigateTo(Screen.SDLoginPage)
     }
+
+    val uploadResult = mutableStateOf<String?>(null)
 }
