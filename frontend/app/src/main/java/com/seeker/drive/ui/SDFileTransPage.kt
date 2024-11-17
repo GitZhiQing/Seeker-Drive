@@ -37,7 +37,6 @@ fun SDFileTransPage(viewModel: MainViewModel) {
     ) {
         Text("文件传输", style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(16.dp))
-        // URL 输入框，输入并点击确认后向 URL 发起 GET 请求下载文件
         Card {
             Row(
                 modifier = Modifier
@@ -87,37 +86,6 @@ fun SDFileTransPage(viewModel: MainViewModel) {
     }
 }
 
-fun downloadSharedFile(
-    token: String,
-    url: String,
-    context: Context,
-    viewModel: MainViewModel
-) {
-    val fid = url.substringAfterLast('/').substringBeforeLast('.')
-    RetrofitJsonInstance.api.downloadFile("Bearer $token", fid.toInt()).also { call ->
-        call.enqueue(object : Callback<ResponseBody> {
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        val file = File(context.getExternalFilesDir(null), fid)
-                        file.outputStream().use { it.write(body.bytes()) }
-                        viewModel.downloadResults.add("下载成功：$url\nPath: ${file.absolutePath}")
-                    } else {
-                        viewModel.downloadResults.add("下载失败：$url")
-                    }
-                } else {
-                    viewModel.downloadResults.add("下载失败：$url")
-                }
-            }
-
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                viewModel.downloadResults.add("下载失败：$url")
-            }
-        })
-    }
-}
-
 @Composable
 fun UrlInputCard(viewModel: MainViewModel, context: Context) {
     Card {
@@ -151,5 +119,42 @@ fun UrlInputCard(viewModel: MainViewModel, context: Context) {
                 )
             }
         }
+    }
+}
+
+fun downloadSharedFile(
+    token: String,
+    url: String,
+    context: Context,
+    viewModel: MainViewModel
+) {
+    val fid = url.substringAfterLast('/').substringBeforeLast('.')
+    RetrofitJsonInstance.api.downloadFile("Bearer $token", fid.toInt()).also { call ->
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    val contentDisposition = response.headers()["Content-Disposition"]
+                    val fileName = contentDisposition?.substringAfter("filename=")?.trim('"')
+                    if (body != null && fileName != null) {
+                        try {
+                            val file = File(context.getExternalFilesDir(null), fileName)
+                            file.outputStream().use { it.write(body.bytes()) }
+                            viewModel.downloadResults.add("下载成功：$url\nPath: ${file.absolutePath}")
+                        } catch (e: Exception) {
+                            viewModel.downloadResults.add("文件写入失败：$url\nError: ${e.message}")
+                        }
+                    } else {
+                        viewModel.downloadResults.add("下载失败：$url\nError: 无法解析文件名或文件内容为空")
+                    }
+                } else {
+                    viewModel.downloadResults.add("下载失败：$url\nError: 响应不成功")
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                viewModel.downloadResults.add("下载失败：$url\nError: ${t.message}")
+            }
+        })
     }
 }
