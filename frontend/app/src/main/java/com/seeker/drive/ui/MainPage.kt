@@ -29,7 +29,7 @@ fun MainPage(viewModel: MainViewModel = viewModel()) {
     ) { uri: Uri? ->
         uri?.let {
             handleFileUpload(context, it, viewModel.token) { result, error ->
-                viewModel.uploadResult.value = result ?: error
+                viewModel.uploadResults.add(result ?: error ?: "Unknown error")
             }
         }
     }

@@ -4,6 +4,7 @@ import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -56,4 +57,10 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("fid") fileId: Int
     ): Call<ResponseBody>
+
+    @DELETE("files/{fid}")
+    fun deleteFile(
+        @Header("Authorization") token: String,
+        @Path("fid") fileId: Int
+    ): Call<Void>
 }

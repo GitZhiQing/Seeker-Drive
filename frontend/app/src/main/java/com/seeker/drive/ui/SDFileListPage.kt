@@ -24,12 +24,14 @@ import retrofit2.Response
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
+import com.seeker.drive.data.RetrofitInstance
 import okhttp3.ResponseBody
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SDFileListPage(viewModel: MainViewModel) {
     var fileList by remember { mutableStateOf<List<FileItem>>(emptyList()) }
@@ -64,69 +66,126 @@ fun SDFileListPage(viewModel: MainViewModel) {
         loadData()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(text = "文件列表", style = MaterialTheme.typography.headlineSmall)
-            IconButton(
-                onClick = { loadData() },
-                modifier = Modifier.rotate(rotation)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "文件列表", style = MaterialTheme.typography.headlineLarge) },
+                actions = {
+                    IconButton(
+                        onClick = { loadData() },
+                        modifier = Modifier.rotate(rotation)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.refresh),
+                            contentDescription = "刷新"
+                        )
+                    }
+                }
+            )
+        },
+        content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.refresh),
-                    contentDescription = "刷新"
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        if (errorMessage != null) {
-            Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
-        } else {
-            LazyColumn {
-                items(fileList) { file ->
-                    FileItemView(file, viewModel.token, viewModel)
+                if (errorMessage != null) {
+                    Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+                } else {
+                    LazyColumn {
+                        items(fileList) { file ->
+                            FileItemView(file, viewModel.token, viewModel, ::loadData)
+                        }
+                    }
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
-fun FileItemView(file: FileItem, token: String?, viewModel: MainViewModel) {
+fun FileItemView(file: FileItem, token: String?, viewModel: MainViewModel, loadData: () -> Unit) {
     val context = LocalContext.current
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Text(text = file.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = "大小: ${file.size} bytes", style = MaterialTheme.typography.bodyMedium)
-            Text(text = "状态: ${file.status}", style = MaterialTheme.typography.bodyMedium)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(text = "大小: ${file.size} bytes", style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "状态: ${if (file.status == 1) "公开" else "私有"}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
             Text(text = "哈希: ${file.hash}", style = MaterialTheme.typography.bodyMedium)
             Text(
                 text = "上传时间: ${convertToShanghaiTime(file.upload_time)}",
                 style = MaterialTheme.typography.bodyMedium
             )
-        }
-        IconButton(onClick = {
-            token?.let {
-                downloadFile(it, file.fid, file.name, context, viewModel)
-            } ?: run {
-                Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconButton(onClick = {
+                    token?.let {
+                        downloadFile(it, file.fid, file.name, context, viewModel)
+                    } ?: run {
+                        Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.download),
+                        contentDescription = "下载",
+                        tint = MaterialTheme.colorScheme.primary // Blue
+                    )
+                }
+                IconButton(onClick = {
+                    token?.let {
+                        deleteFile(it, file.fid) { success, error ->
+                            if (success) {
+                                Toast.makeText(context, "文件删除成功", Toast.LENGTH_SHORT).show()
+                                // 重新加载文件列表
+                                loadData()
+                            } else {
+                                Toast.makeText(context, error ?: "删除文件失败", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    } ?: run {
+                        Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        contentDescription = "删除",
+                        tint = MaterialTheme.colorScheme.error // Red
+                    )
+                }
+                IconButton(onClick = {
+                    Toast.makeText(context, "暂未实现", Toast.LENGTH_SHORT).show()
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.share),
+                        contentDescription = "分享",
+                        tint = MaterialTheme.colorScheme.secondary // Green
+                    )
+                }
             }
-        }) {
-            Icon(
-                painter = painterResource(id = R.drawable.download),
-                contentDescription = "下载"
-            )
         }
     }
 }
@@ -208,6 +267,23 @@ fun fetchFilesList(token: String, callback: (List<FileItem>?, String?) -> Unit) 
 
             override fun onFailure(call: Call<List<FileItem>>, t: Throwable) {
                 callback(null, "网络错误: ${t.message}")
+            }
+        })
+}
+
+fun deleteFile(token: String, fileId: Int, callback: (Boolean, String?) -> Unit) {
+    RetrofitInstance.api.deleteFile("Bearer $token", fileId)
+        .enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    callback(true, null)
+                } else {
+                    callback(false, "删除文件失败")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                callback(false, "网络错误: ${t.message}")
             }
         })
 }

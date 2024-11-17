@@ -52,6 +52,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         navigateTo(Screen.SDLoginPage)
     }
 
-    val uploadResult = mutableStateOf<String?>(null)
+    val uploadResults = mutableStateListOf<String>()
     val downloadResults = mutableStateListOf<String>()
 }
