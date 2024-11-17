@@ -92,7 +92,7 @@ def get_file(
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="文件不存在")
 
-    if db_file.user_id != current_user.uid:
+    if db_file.user_id != current_user.uid and db_file.status != 1:
         raise HTTPException(status_code=403, detail="无权下载")
 
     return FileResponse(path=file_path, filename=db_file.name)
