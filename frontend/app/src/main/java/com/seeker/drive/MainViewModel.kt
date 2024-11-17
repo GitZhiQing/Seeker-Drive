@@ -2,6 +2,7 @@ package com.seeker.drive
 
 import android.app.Application
 import android.content.Context
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-
     private val sharedPreferences =
         application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
@@ -53,6 +53,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun logout() {
         token = null
+        uploadResults.clear()
+        downloadResults.clear()
+        sharedPreferences.edit().remove("uploadResults").remove("downloadResults").apply()
         sharedPreferences.edit().remove("token").apply()
         navigateTo(Screen.SDLoginPage)
     }
@@ -72,23 +75,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun saveResults() {
-        val uploadResultsArray = JSONArray(uploadResults)
-        val downloadResultsArray = JSONArray(downloadResults)
-
-        sharedPreferences.edit()
-            .putString("uploadResults", uploadResultsArray.toString())
-            .putString("downloadResults", downloadResultsArray.toString())
-            .apply()
+    fun getApiProtocol(): String {
+        return getApplication<Application>().getString(R.string.api_protocol)
     }
 
-    fun addUploadResult(result: String) {
-        uploadResults.add(result)
-        saveResults()
+    fun getApiHost(): String {
+        return getApplication<Application>().getString(R.string.api_host)
     }
 
-    fun addDownloadResult(result: String) {
-        downloadResults.add(result)
-        saveResults()
+    fun getApiPort(): String {
+        return getApplication<Application>().getString(R.string.api_port)
+    }
+
+    fun getApiPrefix(): String {
+        return getApplication<Application>().getString(R.string.api_prefix)
     }
 }

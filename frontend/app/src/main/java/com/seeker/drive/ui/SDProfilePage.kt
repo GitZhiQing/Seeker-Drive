@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import com.seeker.drive.MainViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
+import com.seeker.drive.R
 import com.seeker.drive.convertToShanghaiTime
 import com.seeker.drive.fetchCurrentUser
 
@@ -37,7 +38,10 @@ fun SDProfilePage(viewModel: MainViewModel) {
                 fetchCurrentUser(token) { user, error ->
                     if (user != null) {
                         username = user.username
-                        avatar = "http://192.168.31.138:8001/static${user.avatar}"
+                        avatar = context.getString(R.string.api_protocol) +
+                                context.getString(R.string.api_host) +
+                                context.getString(R.string.api_port) +
+                                "/static${user.avatar}"
                         userInfo =
                             "注册时间: ${user.register_time?.let { convertToShanghaiTime(it) }}"
                     } else {

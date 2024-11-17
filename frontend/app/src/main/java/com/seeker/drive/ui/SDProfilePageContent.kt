@@ -120,14 +120,19 @@ fun handleImageUpload(
                 override fun onResponse(call: Call<User>, response: Response<User>) {
                     if (response.isSuccessful) {
                         val user = response.body()
-                        callback("http://192.168.31.138:8001${user?.avatar}", null)
+                        callback(
+                            context.getString(R.string.api_protocol) +
+                                    context.getString(R.string.api_host) +
+                                    context.getString(R.string.api_port) +
+                                    user?.avatar, null
+                        )
                     } else {
-                        callback(null, "Failed to upload avatar: ${response.message()}")
+                        callback(null, "上传头像失败: ${response.message()}")
                     }
                 }
 
                 override fun onFailure(call: Call<User>, t: Throwable) {
-                    callback(null, "Network error: ${t.message}")
+                    callback(null, "网络错误: ${t.message}")
                 }
             })
     }

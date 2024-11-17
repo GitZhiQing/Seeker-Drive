@@ -14,7 +14,7 @@ import com.seeker.drive.R
 
 
 @Composable
-public fun SDBottomBar(viewModel: MainViewModel) {
+fun SDBottomBar(viewModel: MainViewModel) {
     val items = listOf("文件列表", "文件传输")
 
     NavigationBar {

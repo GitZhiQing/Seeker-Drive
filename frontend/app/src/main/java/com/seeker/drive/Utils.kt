@@ -26,12 +26,12 @@ fun fetchCurrentUser(token: String, callback: (User?, String?) -> Unit) {
                 if (response.isSuccessful) {
                     callback(response.body(), null)
                 } else {
-                    callback(null, "Failed to fetch user: ${response.message()}")
+                    callback(null, "获取用户信息失败: ${response.message()}")
                 }
             }
 
             override fun onFailure(call: Call<User>, t: Throwable) {
-                callback(null, "Network error: ${t.message}")
+                callback(null, "网络错误: ${t.message}")
             }
         })
 }

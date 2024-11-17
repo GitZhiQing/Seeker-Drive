@@ -63,4 +63,11 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("fid") fileId: Int
     ): Call<Void>
+
+    @PUT("files/{fid}/status")
+    fun updateFileStatus(
+        @Header("Authorization") token: String,
+        @Path("fid") fid: Int,
+        @Query("status") status: Int
+    ): Call<Void>
 }

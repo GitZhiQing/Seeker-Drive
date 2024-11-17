@@ -153,7 +153,6 @@ fun FileItemView(file: FileItem, token: String?, viewModel: MainViewModel, loadD
                         deleteFile(it, file.fid) { success, error ->
                             if (success) {
                                 Toast.makeText(context, "文件删除成功", Toast.LENGTH_SHORT).show()
-                                // 重新加载文件列表
                                 loadData()
                             } else {
                                 Toast.makeText(context, error ?: "删除文件失败", Toast.LENGTH_SHORT)
@@ -171,7 +170,33 @@ fun FileItemView(file: FileItem, token: String?, viewModel: MainViewModel, loadD
                     )
                 }
                 IconButton(onClick = {
-                    Toast.makeText(context, "暂未实现", Toast.LENGTH_SHORT).show()
+                    token?.let {
+                        updateFileStatus(
+                            it,
+                            file.fid,
+                            if (file.status == 1) 0 else 1
+                        ) { success, error ->
+                            if (success) {
+                                Toast.makeText(context, "文件状态更新成功", Toast.LENGTH_SHORT)
+                                    .show()
+                                loadData()
+                                if (file.status == 0) {
+                                    viewModel.uploadResults.add("文件 ${file.name} 已公开, URL: ${viewModel.getApiProtocol()}${viewModel.getApiHost()}${viewModel.getApiPort()}${viewModel.getApiPrefix()}files/${file.fid}")
+                                } else {
+                                    viewModel.uploadResults.add("文件 ${file.name} 已私有")
+                                }
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    error ?: "更新文件状态失败",
+                                    Toast.LENGTH_SHORT
+                                )
+                                    .show()
+                            }
+                        }
+                    } ?: run {
+                        Toast.makeText(context, "请先登录", Toast.LENGTH_SHORT).show()
+                    }
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.share),
@@ -273,6 +298,28 @@ fun deleteFile(token: String, fileId: Int, callback: (Boolean, String?) -> Unit)
                     callback(true, null)
                 } else {
                     callback(false, "删除文件失败")
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                callback(false, "网络错误: ${t.message}")
+            }
+        })
+}
+
+fun updateFileStatus(
+    token: String,
+    fileId: Int,
+    status: Int,
+    callback: (Boolean, String?) -> Unit
+) {
+    RetrofitJsonInstance.api.updateFileStatus("Bearer $token", fileId, status)
+        .enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    callback(true, null)
+                } else {
+                    callback(false, "更新文件状态失败")
                 }
             }
 

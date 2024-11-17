@@ -11,7 +11,6 @@ import androidx.compose.ui.unit.dp
 import com.seeker.drive.MainViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SDFileTransPage(viewModel: MainViewModel) {
     val uploadResults = viewModel.uploadResults
