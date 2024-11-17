@@ -14,6 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONArray
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
+    private val _url = MutableStateFlow("")
+    val url: StateFlow<String> = _url
+    fun updateUrl(newUrl: String) {
+        _url.value = newUrl
+    }
+
     private val sharedPreferences =
         application.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
 
