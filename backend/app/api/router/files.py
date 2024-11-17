@@ -53,7 +53,6 @@ async def post_file(
     ensure_directory_exists(drive_path)
 
     file_path = get_file_path(current_user.uid, file.filename)
-    ensure_directory_exists(file_path.parent)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
@@ -87,7 +86,7 @@ def get_file(
     下载文件
     """
     db_file = crud.get_file_by_fid(db, fid=fid)
-    file_path = get_file_path(current_user.uid, db_file.name)
+    file_path = get_file_path(db_file.user_id, db_file.name)
 
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="文件不存在")
@@ -111,7 +110,7 @@ def delete_file(
     if not db_file:
         raise HTTPException(status_code=404, detail="文件不存在")
 
-    file_path = Path(get_file_path(current_user.uid, db_file.name))
+    file_path = Path(settings.DRIVE_DIR) / str(db_file.user_id) / db_file.name
 
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="文件不存在")

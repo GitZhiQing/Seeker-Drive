@@ -28,13 +28,21 @@ def db_init_dev():
 
     db: Session = SessionLocal()
     try:
-        user_in = schemas.users.UserCreate(username="seeker", password="123456")
-        existing_user = db.query(models.User).filter(models.User.username == user_in.username).first()  # type: ignore
+        user_in_1 = schemas.users.UserCreate(username="seeker", password="123456")
+        existing_user = db.query(models.User).filter(models.User.username == user_in_1.username).first()  # type: ignore
         if not existing_user:
-            user = crud.create_user(db, user=user_in)
-            logging.info(f"User created: {user.username}")
+            user = crud.create_user(db, user=user_in_1)
+            logging.info(f"User 1 created: {user.username}")
         else:
-            logging.info(f"User already exists: {existing_user.username}")
+            logging.info(f"User 1 already exists: {existing_user.username}")
+
+        user_in_2 = schemas.users.UserCreate(username="admin", password="123456")
+        existing_user = db.query(models.User).filter(models.User.username == user_in_2.username).first()  # type: ignore
+        if not existing_user:
+            user = crud.create_user(db, user=user_in_2)
+            logging.info(f"User 2 created: {user.username}")
+        else:
+            logging.info(f"User 2 already exists: {existing_user.username}")
     finally:
         db.close()
 
