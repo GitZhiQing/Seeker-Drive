@@ -23,12 +23,12 @@ fun MainPage(viewModel: MainViewModel = viewModel()) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            SDProfilePage()
+            SDProfilePage(viewModel)
         }
     ) {
         Scaffold(
             topBar = {
-                SDTopBar(viewModel, onNavigationIconClick = {
+                SDTopBar(onNavigationIconClick = {
                     coroutineScope.launch {
                         drawerState.open()
                     }

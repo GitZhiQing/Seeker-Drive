@@ -17,7 +17,7 @@ import com.seeker.drive.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SDTopBar(viewModel: MainViewModel, onNavigationIconClick: () -> Unit) {
+fun SDTopBar(onNavigationIconClick: () -> Unit) {
     TopAppBar(
         title = {
             Text("Seeker Drive")

@@ -4,19 +4,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import com.seeker.drive.MainViewModel
+import com.seeker.drive.data.RetrofitJsonInstance
+import com.seeker.drive.data.User
+import com.seeker.drive.data.UserCreate
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @Composable
 fun SDRegisterPage(viewModel: MainViewModel) {
@@ -46,14 +46,14 @@ fun SDRegisterPage(viewModel: MainViewModel) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        TextField(
+        OutlinedTextField(
             value = username,
             onValueChange = { username = it },
             label = { Text("用户名") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("密码") },
@@ -70,7 +70,7 @@ fun SDRegisterPage(viewModel: MainViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        TextField(
+        OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = { Text("确认密码") },
@@ -94,39 +94,53 @@ fun SDRegisterPage(viewModel: MainViewModel) {
                         dialogMessage = "用户名不能为空"
                         showDialog = true
                     }
+
                     password.isEmpty() -> {
                         dialogMessage = "密码不能为空"
                         showDialog = true
                     }
+
                     password != confirmPassword -> {
                         dialogMessage = "两次输入的密码不一致"
                         showDialog = true
                     }
+
                     else -> {
-                        // 处理注册逻辑
-                        viewModel.navigateTo(MainViewModel.Screen.SDLoginPage)
+                        val userCreate = UserCreate(username, password)
+                        RetrofitJsonInstance.api.register(userCreate)
+                            .enqueue(object : Callback<User> {
+                                override fun onResponse(
+                                    call: Call<User>,
+                                    response: Response<User>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        viewModel.navigateTo(MainViewModel.Screen.SDLoginPage)
+                                    } else {
+                                        dialogMessage = "注册失败: ${response.message()}"
+                                        showDialog = true
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<User>, t: Throwable) {
+                                    dialogMessage = "网络错误: ${t.message}"
+                                    showDialog = true
+                                }
+                            })
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("确认注册")
+            Text("注册")
         }
 
-        //创建一个返回按钮
         Button(
             onClick = {
-                viewModel.navigateTo(MainViewModel.Screen.SDLoginPage)    //跳转到注册界面
+                viewModel.navigateTo(MainViewModel.Screen.SDLoginPage)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("已有账号，返回登录")
+            Text("已有账号？登录")
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RegisterPagePreview() {
-    SDRegisterPage(viewModel = MainViewModel())
 }

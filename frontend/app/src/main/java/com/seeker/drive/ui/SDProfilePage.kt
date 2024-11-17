@@ -1,55 +1,61 @@
 package com.seeker.drive.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.seeker.drive.R
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.*
+import com.seeker.drive.MainViewModel
+import kotlinx.coroutines.launch
+import androidx.compose.ui.platform.LocalContext
+
 
 @Composable
-fun SDProfilePage() {
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(0.85f)
-            .background(Color.White)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.account_circle),
-                contentDescription = "Profile Icon",
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "用户名",
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+fun SDProfilePage(viewModel: MainViewModel) {
+    var username by remember { mutableStateOf("Loading...") }
+    var userInfo by remember { mutableStateOf("Loading...") }
+    var avatar by remember { mutableStateOf("") }
+    var uploadError by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            handleImageUpload(context, it, viewModel.token) { newAvatar, error ->
+                avatar = newAvatar ?: avatar
+                uploadError = error
+            }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "个人信息",
-            fontSize = 24.sp,
-            color = MaterialTheme.colorScheme.onBackground
-        )
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.token?.let { token ->
+            coroutineScope.launch {
+                fetchCurrentUser(token) { user, error ->
+                    if (user != null) {
+                        username = user.username
+                        avatar = "http://192.168.31.138:8001/static${user.avatar}"
+                        userInfo =
+                            "注册时间: ${user.register_time?.let { convertToShanghaiTime(it) }}"
+                    } else {
+                        username = "加载失败"
+                        userInfo = error ?: "加载用户信息失败"
+                    }
+                }
+            }
+        } ?: run {
+            username = "未登录"
+            userInfo = "请先登录"
+        }
+    }
+
+    SDProfilePageContent(
+        username = username,
+        userInfo = userInfo,
+        avatar = avatar,
+        uploadError = uploadError,
+        onPickImage = { imagePickerLauncher.launch("image/*") },
+        onLogout = { viewModel.logout() }
+    )
 }
