@@ -88,7 +88,7 @@ fun SDFileListPage(viewModel: MainViewModel) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(16.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
             ) {
                 if (errorMessage != null) {
                     Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)

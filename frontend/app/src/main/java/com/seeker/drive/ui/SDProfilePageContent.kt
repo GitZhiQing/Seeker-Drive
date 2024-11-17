@@ -39,7 +39,7 @@ fun SDProfilePageContent(
             .fillMaxHeight()
             .fillMaxWidth(0.80f)
             .background(Color.White)
-            .padding(top = 32.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+            .padding(top = 64.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -77,14 +77,14 @@ fun SDProfilePageContent(
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(48.dp))
         Button(
             onClick = onPickImage,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "设置头像")
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
             onClick = onLogout,
             modifier = Modifier
