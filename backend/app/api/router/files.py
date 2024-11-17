@@ -94,7 +94,11 @@ def get_file(
     if db_file.user_id != current_user.uid and db_file.status != 1:
         raise HTTPException(status_code=403, detail="无权下载")
 
-    return FileResponse(path=file_path, filename=db_file.name)
+    return FileResponse(
+        path=file_path,
+        filename=db_file.name,
+        headers={"Content-Disposition": f"attachment; filename={db_file.name}"},
+    )
 
 
 @router.delete("/{fid}")
@@ -131,7 +135,6 @@ def delete_file(
     return {"message": "删除成功"}
 
 
-# 更改文件状态 API
 @router.put("/{fid}/status")
 def update_file_status(
     fid: int,
