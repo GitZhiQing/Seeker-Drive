@@ -108,7 +108,10 @@ def delete_file(
     删除文件
     """
     db_file = crud.get_file_by_fid(db, fid=fid)
-    file_path = get_file_path(current_user.uid, db_file.name)
+    if not db_file:
+        raise HTTPException(status_code=404, detail="文件不存在")
+
+    file_path = Path(get_file_path(current_user.uid, db_file.name))
 
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="文件不存在")
@@ -116,9 +119,15 @@ def delete_file(
     if db_file.user_id != current_user.uid:
         raise HTTPException(status_code=403, detail="无权删除")
 
-    file_path.unlink()
+    try:
+        file_path.unlink()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"文件删除失败: {str(e)}")
 
-    crud.delete_file_by_fid(db, fid=fid)
+    try:
+        crud.delete_file_by_fid(db, fid=fid)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"数据库操作失败: {str(e)}")
 
     return {"message": "删除成功"}
 
