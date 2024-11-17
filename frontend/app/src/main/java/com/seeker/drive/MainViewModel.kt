@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
@@ -52,4 +53,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     val uploadResult = mutableStateOf<String?>(null)
+    val downloadResults = mutableStateListOf<String>()
 }
