@@ -12,9 +12,9 @@ from app.database import crud
 router = APIRouter()
 
 
-@router.get("/current")
+@router.get("/current", response_model=schemas.users.User)
 async def read_users_me(
-    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)]
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
 ):
     """
     获取当前用户信息
@@ -90,17 +90,17 @@ async def update_avatar(
     """
     更新用户头像
     """
-    avatar_path = f"{settings.STATIC_DIR}/{current_user.avatar}"
+    avatar_path = f"{settings.STATIC_DIR}/avatars/{current_user.uid}"
     if not os.path.exists(avatar_path):
         os.makedirs(avatar_path, exist_ok=True)
 
     # 保存上传的文件
-    file_location = f"{avatar_path}/{current_user.uid}_{file.filename}"
+    file_location = f"{avatar_path}/{file.filename}"
     with open(file_location, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
     # 更新用户头像路径
-    file_path = f"avatars/{current_user.uid}_{file.filename}"
+    file_path = f"/avatars/{current_user.uid}/{file.filename}"
     updated_user = crud.update_user_avatar(
         db=db, user=current_user, file_path=file_path
     )

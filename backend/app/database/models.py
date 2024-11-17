@@ -24,7 +24,7 @@ class File(Base):
     fid = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     size = Column(Integer, nullable=False)
-    status = Column(Integer, nullable=False)
+    status = Column(Integer, nullable=False, default=0)
     hash = Column(String, nullable=False)
     upload_time = Column(String, default=str(int(time.time())))
     user_id = Column(

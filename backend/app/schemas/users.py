@@ -20,6 +20,7 @@ class User(UserBase):
         from_attributes = True
 
 
+
 class UserInDB(User):
     hashed_password: str
 

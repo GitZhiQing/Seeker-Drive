@@ -67,7 +67,7 @@ async def post_file(
         name=file.filename,
         size=file_size,
         type=file.content_type,
-        status=1,
+        status=0,
         hash=file_hash,
         user_id=current_user.uid,
     )
@@ -121,3 +121,22 @@ def delete_file(
     crud.delete_file_by_fid(db, fid=fid)
 
     return {"message": "删除成功"}
+
+
+# 更改文件状态 API
+@router.put("/{fid}/status")
+def update_file_status(
+    fid: int,
+    status: int,
+    current_user: Annotated[schemas.users.User, Depends(deps.get_current_user)],
+    db: Session = Depends(deps.get_db),
+):
+    """
+    更改文件状态
+    """
+    db_file = crud.get_file_by_fid(db, fid=fid)
+    if db_file.user_id != current_user.uid:
+        raise HTTPException(status_code=403, detail="无权更改")
+
+    updated_file = crud.update_file_status_by_fid(db=db, fid=fid, status=status)
+    return schemas.files.File.from_orm(updated_file)

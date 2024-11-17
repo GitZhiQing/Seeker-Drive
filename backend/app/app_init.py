@@ -3,7 +3,7 @@ import shutil
 
 from sqlalchemy.orm import Session
 
-from app import settings
+from app import settings, logging
 from app.database import SessionLocal
 
 
@@ -32,9 +32,9 @@ def db_init_dev():
         existing_user = db.query(models.User).filter(models.User.username == user_in.username).first()  # type: ignore
         if not existing_user:
             user = crud.create_user(db, user=user_in)
-            print(user)
+            logging.info(f"User created: {user.username}")
         else:
-            print(f"User with username '{user_in.username}' already exists.")
+            logging.info(f"User already exists: {existing_user.username}")
     finally:
         db.close()
 

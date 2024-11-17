@@ -67,3 +67,13 @@ def delete_file_by_fid(db: Session, fid: int):
     if db_file:
         db.delete(db_file)
         db.commit()
+
+
+def update_file_status_by_fid(db: Session, fid: int, status: int):
+    db_file = db.query(models.File).filter(models.File.fid == fid).first()  # type: ignore
+    if db_file:
+        db_file.status = status
+        db.commit()
+        db.refresh(db_file)
+        return db_file
+    return None
