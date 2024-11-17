@@ -17,53 +17,48 @@ fun SDFileTransPage(viewModel: MainViewModel) {
     val uploadResults = viewModel.uploadResults
     val downloadResults = viewModel.downloadResults
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("文件传输", style = MaterialTheme.typography.headlineLarge) }
-            )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-            ) {
-                item {
-                    Text("上传结果", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                items(uploadResults) { result ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(result, style = MaterialTheme.typography.bodyLarge)
-                        }
-                    }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("下载结果", style = MaterialTheme.typography.headlineSmall)
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-                items(downloadResults) { result ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(result, style = MaterialTheme.typography.bodyLarge)
-                        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text("文件传输", style = MaterialTheme.typography.headlineLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("上传结果", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyColumn {
+            items(uploadResults) { result ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(result, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
         }
-    )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("下载结果", style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(8.dp))
+        LazyColumn {
+            items(downloadResults) { result ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(result, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        }
+    }
 }

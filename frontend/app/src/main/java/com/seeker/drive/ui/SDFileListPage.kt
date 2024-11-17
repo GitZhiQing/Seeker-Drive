@@ -31,7 +31,6 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SDFileListPage(viewModel: MainViewModel) {
     var fileList by remember { mutableStateOf<List<FileItem>>(emptyList()) }
@@ -66,42 +65,37 @@ fun SDFileListPage(viewModel: MainViewModel) {
         loadData()
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "文件列表", style = MaterialTheme.typography.headlineLarge) },
-                actions = {
-                    IconButton(
-                        onClick = { loadData() },
-                        modifier = Modifier.rotate(rotation)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.refresh),
-                            contentDescription = "刷新"
-                        )
-                    }
-                }
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "文件列表", style = MaterialTheme.typography.headlineLarge)
+            IconButton(
+                onClick = { loadData() },
+                modifier = Modifier.rotate(rotation)
             ) {
-                if (errorMessage != null) {
-                    Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
-                } else {
-                    LazyColumn {
-                        items(fileList) { file ->
-                            FileItemView(file, viewModel.token, viewModel, ::loadData)
-                        }
-                    }
+                Icon(
+                    painter = painterResource(id = R.drawable.refresh),
+                    contentDescription = "刷新"
+                )
+            }
+        }
+
+        if (errorMessage != null) {
+            Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+        } else {
+            LazyColumn {
+                items(fileList) { file ->
+                    FileItemView(file, viewModel.token, viewModel, ::loadData)
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
