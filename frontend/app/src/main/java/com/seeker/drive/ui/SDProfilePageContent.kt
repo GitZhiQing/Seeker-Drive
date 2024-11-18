@@ -35,7 +35,7 @@ fun SDProfilePageContent(
     onLogout: () -> Unit,
     drawerState: DrawerState
 ) {
-    val widthFraction = if (drawerState.isClosed) 0.1f else 0.85f
+    val widthFraction = if (drawerState.isClosed) 0f else 0.85f
 
     Column(
         modifier = Modifier

@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -56,7 +55,7 @@ fun SDFileTransPage(viewModel: MainViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(result, style = MaterialTheme.typography.bodyLarge)
@@ -75,7 +74,7 @@ fun SDFileTransPage(viewModel: MainViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(result, style = MaterialTheme.typography.bodyLarge)
@@ -92,7 +91,7 @@ fun UrlInputCard(viewModel: MainViewModel, context: Context) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically // 垂直居中对齐
         ) {
             val url by viewModel.url.collectAsState()
