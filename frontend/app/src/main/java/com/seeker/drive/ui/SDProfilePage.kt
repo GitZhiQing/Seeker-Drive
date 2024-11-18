@@ -3,6 +3,7 @@ package com.seeker.drive.ui
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.*
 import com.seeker.drive.MainViewModel
 import kotlinx.coroutines.launch
@@ -13,7 +14,7 @@ import com.seeker.drive.fetchCurrentUser
 
 
 @Composable
-fun SDProfilePage(viewModel: MainViewModel) {
+fun SDProfilePage(viewModel: MainViewModel, drawerState: DrawerState) {
     var username by remember { mutableStateOf("Loading...") }
     var userInfo by remember { mutableStateOf("Loading...") }
     var avatar by remember { mutableStateOf("") }
@@ -62,7 +63,8 @@ fun SDProfilePage(viewModel: MainViewModel) {
         avatar = avatar,
         uploadError = uploadError,
         onPickImage = { imagePickerLauncher.launch("image/*") },
-        onLogout = { viewModel.logout() }
+        onLogout = { viewModel.logout() },
+        drawerState = drawerState
     )
 }
 

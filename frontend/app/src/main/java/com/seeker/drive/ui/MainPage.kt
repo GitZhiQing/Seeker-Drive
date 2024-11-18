@@ -37,8 +37,9 @@ fun MainPage(viewModel: MainViewModel = viewModel()) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            SDProfilePage(viewModel)
-        }
+            SDProfilePage(viewModel, drawerState)
+        },
+        modifier = Modifier.fillMaxSize()
     ) {
         Scaffold(
             topBar = {
@@ -61,7 +62,9 @@ fun MainPage(viewModel: MainViewModel = viewModel()) {
             }
         ) { innerPadding ->
             Column(
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 when (viewModel.selectedItem) {

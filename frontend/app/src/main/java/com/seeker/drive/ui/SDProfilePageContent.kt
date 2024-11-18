@@ -32,12 +32,15 @@ fun SDProfilePageContent(
     avatar: String,
     uploadError: String?,
     onPickImage: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    drawerState: DrawerState
 ) {
+    val widthFraction = if (drawerState.isClosed) 0.1f else 0.85f
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
-            .fillMaxWidth(0.80f)
+            .fillMaxWidth(widthFraction)
             .background(Color.White)
             .padding(top = 64.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
