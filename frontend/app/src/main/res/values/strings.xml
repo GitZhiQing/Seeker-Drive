@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SeekerDrive</string>
     <string name="api_protocol">http://</string>
-    <string name="api_host">192.168.43.45</string>
-    <string name="api_port">:8002</string>
+    <string name="api_host">ctf.seek2.top</string>
+    <string name="api_port">:9999</string>
     <string name="api_prefix">/api/</string>
 </resources>
